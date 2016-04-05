@@ -1,6 +1,10 @@
 package com.incesoft.tools.excel.xlsx;
 
 
+import com.incesoft.tools.excel.support.DateUtil;
+
+import java.util.Calendar;
+
 /**
  * @author floyd
  * 
@@ -30,13 +34,9 @@ public class Cell {
 
 	private String comment;
 
-	public String getComment() {
-		return comment;
-	}
+	private String numFmt;
 
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
+	private boolean isDate;
 
 	String getR() {
 		return r;
@@ -78,8 +78,36 @@ public class Cell {
 		this.v = v;
 	}
 
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public String getNumFmt() {
+		return numFmt;
+	}
+
+	public void setNumFmt(String numFmt) {
+		this.numFmt = numFmt;
+	}
+
+	public boolean isDate() {
+		return isDate;
+	}
+
+	public void setDate(boolean date) {
+		isDate = date;
+	}
+
+	public Calendar getDateValue() {
+		return DateUtil.getJavaCalendar(v);
+	}
+
 	public String getValue() {
-		if (text != null)
+		if (text != null && t != null && t.equals("s"))
 			return text;
 		if (v != null)
 			return v;

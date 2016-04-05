@@ -90,6 +90,7 @@ public class SimpleXLSXWorkbook {
 				parseSharedStrings(stream);
 			}
 			initSheets();
+			initNumFmts();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -662,6 +663,75 @@ public class SimpleXLSXWorkbook {
 		} catch (XMLStreamException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	// dictionary between numFmtId -> formatCode
+	private Map<Integer, String> numFmts;
+
+	// List of supported numFmtId, it works as a dictionary, to get from styleIndex to numFmtId
+	private List<Integer> cellXfs;
+
+	private void initNumFmts() {
+		numFmts = ExcelUtils.builtInFormats;
+		cellXfs = new ArrayList<Integer>();
+		try {
+			XMLStreamReader reader = getStylesReader();
+			while (reader.hasNext()) {
+				int event = reader.next();
+				// <numFmts>
+				if (event == XMLStreamReader.START_ELEMENT) {
+					if ("numFmts".equals(reader.getLocalName())) {
+						// read all <numFmt> tags
+						while (reader.hasNext()) {
+							event = reader.next();
+							// <numFmt>
+							if (event == XMLStreamReader.START_ELEMENT
+									&& "numFmt".equals(reader.getLocalName())) {
+								int id = Integer.valueOf(reader.getAttributeValue(null, "numFmtId"));
+								// replace built-in numFmt or put new
+								numFmts.put(id, reader.getAttributeValue(null, "formatCode"));
+							} else if (event == XMLStreamReader.END_ELEMENT
+									&& "numFmts".equals(reader.getLocalName())) {
+								break;
+							}
+						}
+					} else if ("cellXfs".equals(reader.getLocalName())) {
+						// read all <xf> tags
+						while (reader.hasNext()) {
+							event = reader.next();
+							// <xf>
+							if (event == XMLStreamReader.START_ELEMENT
+									&& "xf".equals(reader.getLocalName())) {
+								cellXfs.add(Integer.valueOf(reader.getAttributeValue(null, "numFmtId")));
+							} else if (event == XMLStreamReader.END_ELEMENT
+									&& "cellXfs".equals(reader.getLocalName())) {
+								break;
+							}
+						}
+					}
+				}
+			}
+		} catch (XMLStreamException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public Integer getNumFmtId(String styleIndex) {
+		if (null == cellXfs) {
+			return 0;
+		}
+		try {
+			return cellXfs.get(Integer.parseInt(styleIndex));
+		} catch (NumberFormatException e) {
+			return 0;
+		}
+	}
+
+	public String getNumFmt(Integer numFmtId) {
+		if (null == numFmts) {
+			return "";
+		}
+		return numFmts.get(numFmtId);
 	}
 
 	/**

@@ -1,13 +1,13 @@
 package com.incesoft.tools.excel.support;
 
-import java.io.File;
-
-import com.incesoft.tools.excel.ExcelRowIterator;
 import com.incesoft.tools.excel.ReaderSupport;
+import com.incesoft.tools.excel.XLSXRowIterator;
 import com.incesoft.tools.excel.xlsx.Cell;
 import com.incesoft.tools.excel.xlsx.Sheet;
-import com.incesoft.tools.excel.xlsx.SimpleXLSXWorkbook;
 import com.incesoft.tools.excel.xlsx.Sheet.SheetRowReader;
+import com.incesoft.tools.excel.xlsx.SimpleXLSXWorkbook;
+
+import java.io.File;
 
 public class XLSXReaderSupport extends ReaderSupport {
 
@@ -22,7 +22,7 @@ public class XLSXReaderSupport extends ReaderSupport {
 
 	private boolean lazy = true;
 
-	protected class LazyXLSXObjectIterator implements ExcelRowIterator {
+	protected class LazyXLSXObjectIterator implements XLSXRowIterator {
 
 		public int getCellCount() {
 			return curRow != null ? curRow.length : 0;
@@ -77,9 +77,13 @@ public class XLSXReaderSupport extends ReaderSupport {
 				lastRow = null;
 			}
 		}
+
+		public Cell[] getCurRow() {
+			return curRow;
+		}
 	}
 
-	protected class XLSXObjectIterator implements ExcelRowIterator {
+	protected class XLSXObjectIterator implements XLSXRowIterator {
 
 		int currentSheetRowCount;
 
@@ -113,7 +117,7 @@ public class XLSXReaderSupport extends ReaderSupport {
 		}
 
 		public int getCellCount() {
-			Cell[] row = sheet.getRows().get(rowPos);
+			Cell[] row = getCurRow();
 			return row == null ? 0 : row.length;
 		}
 
@@ -123,23 +127,31 @@ public class XLSXReaderSupport extends ReaderSupport {
 				rowPos = 0;
 			}
 		}
+
+		public Cell[] getCurRow() {
+			return sheet.getRows().get(rowPos);
+		}
 	}
 
 	public void open() {
+		open(0);
+	}
+
+	public void open(int sheetNum) {
 		try {
 			if (!inputFile.exists()) {
 				throw new IllegalStateException("not found file "
 						+ inputFile.getAbsoluteFile());
 			}
 			wb = new SimpleXLSXWorkbook(inputFile);
-			sheet = wb.getSheet(0, !lazy);
+			sheet = wb.getSheet(sheetNum, !lazy);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public ExcelRowIterator rowIterator() {
-		ExcelRowIterator iterator = lazy ? new LazyXLSXObjectIterator()
+	public XLSXRowIterator rowIterator() {
+		XLSXRowIterator iterator = lazy ? new LazyXLSXObjectIterator()
 				: new XLSXObjectIterator();
 		iterator.init();
 		return iterator;

@@ -9,6 +9,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
+import com.incesoft.tools.excel.support.DateUtil;
 import com.incesoft.tools.excel.xlsx.SimpleXLSXWorkbook.ModifyEntry;
 import com.incesoft.tools.excel.xlsx.SimpleXLSXWorkbook.XMLStreamCreator;
 
@@ -142,7 +143,7 @@ public class Sheet {
 						} else if ("c".equals(reader.getLocalName())) {
 							if (ret != null) {
 								t = reader.getAttributeValue(null, "t");
-								// s = reader.getAttributeValue(null, "s");
+								s = reader.getAttributeValue(null, "s");
 								r = reader.getAttributeValue(null, "r");
 								text = null;
 								v = null;
@@ -162,13 +163,16 @@ public class Sheet {
 										break;
 									}
 								}
+								Cell cell = new Cell(r, s, t, v, text);
+								int numFmtId = sheet.workbook.getNumFmtId(s);
+								cell.setNumFmt(sheet.workbook.getNumFmt(numFmtId));
+								cell.setDate(DateUtil.isADateFormat(numFmtId, cell.getNumFmt()));
 								if (r.charAt(1) < 'A') {// number
-									ret[r.charAt(0) - 'A'] = new Cell(r, s, t,
-											v, text);
+									ret[r.charAt(0) - 'A'] = cell;
 								} else if (r.length() > 2 && r.charAt(2) < 'A') {
 										int i = (r.charAt(1) - 'A') + (r.charAt(0) - 'A' + 1) * 26;
 										if (i < MAX_COLUMN_SPAN)
-											ret[i] = new Cell(r, s, t, v, text);
+											ret[i] = cell;
 								}
 								// ignore columns larger than ZZ
 							} else {

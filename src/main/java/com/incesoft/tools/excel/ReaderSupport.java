@@ -1,11 +1,11 @@
 package com.incesoft.tools.excel;
 
-import java.io.File;
-
 import com.incesoft.tools.excel.support.XLSReaderSupport;
 import com.incesoft.tools.excel.support.XLSXReaderSupport;
 
-abstract public class ReaderSupport {
+import java.io.File;
+
+abstract public class ReaderSupport implements AutoCloseable {
 
 	public final static int TYPE_XLS = 1;
 	public final static int TYPE_XLSX = 2;
@@ -15,8 +15,6 @@ abstract public class ReaderSupport {
 	abstract public void open();
 
 	abstract public ExcelRowIterator rowIterator();
-
-	abstract public void close();
 
 	public static ReaderSupport newInstance(int type, File f) {
 		ReaderSupport support = null;

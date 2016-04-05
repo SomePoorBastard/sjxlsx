@@ -1,20 +1,56 @@
 package com.incesoft.tools.excel.xlsx;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
+import com.incesoft.tools.excel.XLSXRowIterator;
+import com.incesoft.tools.excel.support.XLSXReaderSupport;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
 public class ExcelUtils {
+
+	public static Map<Integer, String> builtInFormats = new HashMap<Integer, String>();
+	static {
+		builtInFormats.put(0, "general");
+		builtInFormats.put(1, "0");
+		builtInFormats.put(2, "0.00");
+		builtInFormats.put(3, "#,##0");
+		builtInFormats.put(4, "#,##0.00");
+		builtInFormats.put(9, "0%");
+		builtInFormats.put(10, "0.00%");
+		builtInFormats.put(11, "0.00e+00");
+		builtInFormats.put(12, "# ?/?");
+		builtInFormats.put(13, "# ??/??");
+		builtInFormats.put(14, "mm-dd-yy");
+		builtInFormats.put(15, "d-mmm-yy");
+		builtInFormats.put(16, "d-mmm");
+		builtInFormats.put(17, "mmm-yy");
+		builtInFormats.put(18, "h:mm am/pm");
+		builtInFormats.put(19, "h:mm:ss am/pm");
+		builtInFormats.put(20, "h:mm");
+		builtInFormats.put(21, "h:mm:ss");
+		builtInFormats.put(22, "m/d/yy h:mm");
+		builtInFormats.put(37, "#,##0 ;(#,##0)");
+		builtInFormats.put(38, "#,##0 ;[red](#,##0)");
+		builtInFormats.put(39, "#,##0.00;(#,##0.00)");
+		builtInFormats.put(40, "#,##0.00;[red](#,##0.00)");
+		builtInFormats.put(41, "_(* #,##0_);_(* \\(#,##0\\);_(* \"-\"_);_(@_)");
+		builtInFormats.put(42, "_(\"$\"* #,##0_);_(\"$* \\(#,##0\\);_(\"$\"* \"-\"_);_(@_)");
+		builtInFormats.put(43, "_(* #,##0.00_);_(* \\(#,##0.00\\);_(* \"-\"??_);_(@_)");
+		builtInFormats.put(44, "_(\"$\"* #,##0.00_);_(\"$\"* \\(#,##0.00\\);_(\"$\"* \"-\"??_);_(@_)");
+		builtInFormats.put(45, "mm:ss");
+		builtInFormats.put(46, "[h]:mm:ss");
+		builtInFormats.put(47, "mmss.0");
+		builtInFormats.put(48, "##0.0e+0");
+		builtInFormats.put(49, "@");
+	}
+
+	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 	/**
 	 * Excel 2007+ using the OOXML format(actually is a zip)
@@ -67,13 +103,41 @@ public class ExcelUtils {
 			try {
 				if (zipFile != null)
 					zipFile.close();
-			} catch (IOException e) {}
+			} catch (IOException ignored) {}
 		}
 	}
 
-	public static void main(String[] args) {
-		File file = new File("/(全部-实例备份)(20120215154228)..xlsx");
-		System.out.println(checksumZipContent(file));
-		System.out.println(file.delete());
+	public static void toCSV(String input, String output, int sheetNum) throws IOException {
+		try (
+				XLSXReaderSupport rxs = new XLSXReaderSupport();
+				FileOutputStream fo = new FileOutputStream(new File(output));
+		) {
+			rxs.setInputFile(new File(input));
+			rxs.open(sheetNum);
+			XLSXRowIterator it = rxs.rowIterator();
+			while (it.nextRow()) {
+				List<String> cells = new ArrayList<>();
+				for (Cell cell : it.getCurRow()) {
+					cells.add(getQuotedCellValue(cell));
+				}
+				String buf = StringUtils.join(cells, ',') + "\n";
+				fo.write(buf.getBytes());
+			}
+		}
+	}
+
+	public static String getQuotedCellValue(Cell cell) {
+		String value = "";
+		if (null != cell && null != cell.getValue()) {
+			if (cell.isDate()) {
+				Calendar cal = cell.getDateValue();
+				if (null != cal) {
+					value = sdf.format(cal.getTime());
+				}
+			} else {
+				value = cell.getValue().trim();
+			}
+		}
+		return "\"" + value + "\"";
 	}
 }
