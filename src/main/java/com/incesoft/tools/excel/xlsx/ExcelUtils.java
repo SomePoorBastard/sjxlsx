@@ -139,11 +139,18 @@ public class ExcelUtils {
 			}
 			while (it.nextRow()) {
 				List<String> cells = new ArrayList<>();
+				boolean isEmpty = true;
 				for (Cell cell : it.getCurRow()) {
-					cells.add(getQuotedCellValue(cell));
+					if (null != cell && StringUtils.isNotBlank(cell.getValue())) {
+						isEmpty = false;
+						cells.add(getQuotedCellValue(cell));
+					}
 				}
-				String buf = StringUtils.join(cells, ',') + "\n";
-				fo.write(buf.getBytes());
+				// skip empty rows
+				if (!isEmpty) {
+					String buf = StringUtils.join(cells, ',') + "\n";
+					fo.write(buf.getBytes());
+				}
 			}
 		}
 	}
@@ -155,17 +162,12 @@ public class ExcelUtils {
 	 * @return string in quoted format
      */
 	public static String getQuotedCellValue(Cell cell) {
-		String value = "";
-		if (null != cell && null != cell.getValue()) {
-			if (cell.isDate()) {
-				Calendar cal = cell.getDateValue();
-				if (null != cal) {
-					value = sdf.format(cal.getTime());
-				}
-			} else {
-				value = cell.getValue().trim();
+		if (cell.isDate()) {
+			Calendar cal = cell.getDateValue();
+			if (null != cal) {
+				return "\"" + sdf.format(cal.getTime()) + "\"";
 			}
 		}
-		return "\"" + value + "\"";
+		return cell.getValue().trim() + "\"";
 	}
 }
