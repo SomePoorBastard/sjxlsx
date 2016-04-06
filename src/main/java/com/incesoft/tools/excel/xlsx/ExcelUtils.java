@@ -1,6 +1,5 @@
 package com.incesoft.tools.excel.xlsx;
 
-import com.incesoft.tools.excel.XLSXRowIterator;
 import com.incesoft.tools.excel.support.XLSXReaderSupport;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -14,7 +13,7 @@ import java.util.zip.ZipFile;
 
 public class ExcelUtils {
 
-	public static Map<Integer, String> builtInFormats = new HashMap<Integer, String>();
+	public static Map<Integer, String> builtInFormats = new HashMap<>();
 	static {
 		builtInFormats.put(0, "general");
 		builtInFormats.put(1, "0");
@@ -107,12 +106,29 @@ public class ExcelUtils {
 		}
 	}
 
+	/**
+	 * Overload method
+	 * @param input       Path to input XLSX file
+	 * @param output      Path to output CSV file
+	 * @param sheetNum    Sheet number to extract
+	 * @throws IOException
+     */
 	public static void toCSV(String input, String output, int sheetNum) throws IOException {
+		toCSV(new File(input), new File(output), sheetNum);
+	}
+
+	/**
+	 * Convert from input XLSX file to CSV
+	 * @param input       Input XLSX file
+	 * @param output      Output CSV file
+	 * @param sheetNum    Sheet number to extract
+     */
+	public static void toCSV(File input, File output, int sheetNum) throws IOException {
 		try (
 				XLSXReaderSupport rxs = new XLSXReaderSupport();
-				FileOutputStream fo = new FileOutputStream(new File(output));
+				FileOutputStream fo = new FileOutputStream(output);
 		) {
-			rxs.setInputFile(new File(input));
+			rxs.setInputFile(input);
 			rxs.open(sheetNum);
 			XLSXRowIterator it = rxs.rowIterator();
 			while (it.nextRow()) {
@@ -126,6 +142,12 @@ public class ExcelUtils {
 		}
 	}
 
+	/**
+	 * Get formatted date value or string value
+	 * in quoted format, ready for CSV cell
+	 * @param cell    XLSX cell to extract
+	 * @return string in quoted format
+     */
 	public static String getQuotedCellValue(Cell cell) {
 		String value = "";
 		if (null != cell && null != cell.getValue()) {

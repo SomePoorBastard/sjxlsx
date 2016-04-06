@@ -218,6 +218,7 @@ public class DateUtil {
     }
 
     /**
+     * TODO: honor date1904 boolean value
      * Get EXCEL date as Java Calendar.
      * @return Java representation of the date, or null if date is not a valid Excel date
      */

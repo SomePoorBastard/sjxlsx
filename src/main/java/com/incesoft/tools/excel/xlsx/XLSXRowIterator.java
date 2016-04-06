@@ -1,5 +1,6 @@
-package com.incesoft.tools.excel;
+package com.incesoft.tools.excel.xlsx;
 
+import com.incesoft.tools.excel.ExcelRowIterator;
 import com.incesoft.tools.excel.xlsx.Cell;
 
 /**

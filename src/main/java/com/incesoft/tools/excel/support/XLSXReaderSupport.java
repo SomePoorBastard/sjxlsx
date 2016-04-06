@@ -1,7 +1,7 @@
 package com.incesoft.tools.excel.support;
 
 import com.incesoft.tools.excel.ReaderSupport;
-import com.incesoft.tools.excel.XLSXRowIterator;
+import com.incesoft.tools.excel.xlsx.XLSXRowIterator;
 import com.incesoft.tools.excel.xlsx.Cell;
 import com.incesoft.tools.excel.xlsx.Sheet;
 import com.incesoft.tools.excel.xlsx.Sheet.SheetRowReader;
