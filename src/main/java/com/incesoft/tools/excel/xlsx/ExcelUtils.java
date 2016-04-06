@@ -111,10 +111,11 @@ public class ExcelUtils {
 	 * @param input       Path to input XLSX file
 	 * @param output      Path to output CSV file
 	 * @param sheetNum    Sheet number to extract
+	 * @param rowStart    Row index where the report begins
 	 * @throws IOException
      */
-	public static void toCSV(String input, String output, int sheetNum) throws IOException {
-		toCSV(new File(input), new File(output), sheetNum);
+	public static void toCSV(String input, String output, int sheetNum, int rowStart) throws IOException {
+		toCSV(new File(input), new File(output), sheetNum, rowStart);
 	}
 
 	/**
@@ -122,8 +123,9 @@ public class ExcelUtils {
 	 * @param input       Input XLSX file
 	 * @param output      Output CSV file
 	 * @param sheetNum    Sheet number to extract
-     */
-	public static void toCSV(File input, File output, int sheetNum) throws IOException {
+	 * @param rowStart    Row index where the report begins
+	 */
+	public static void toCSV(File input, File output, int sheetNum, int rowStart) throws IOException {
 		try (
 				XLSXReaderSupport rxs = new XLSXReaderSupport();
 				FileOutputStream fo = new FileOutputStream(output);
@@ -131,6 +133,10 @@ public class ExcelUtils {
 			rxs.setInputFile(input);
 			rxs.open(sheetNum);
 			XLSXRowIterator it = rxs.rowIterator();
+			// skip first 'rowStart' rows
+			for (int i = 0; i < rowStart; i++) {
+				it.nextRow();
+			}
 			while (it.nextRow()) {
 				List<String> cells = new ArrayList<>();
 				for (Cell cell : it.getCurRow()) {
