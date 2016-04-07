@@ -168,6 +168,6 @@ public class ExcelUtils {
 				return "\"" + sdf.format(cal.getTime()) + "\"";
 			}
 		}
-		return cell.getValue().trim() + "\"";
+		return "\"" + cell.getValue().trim() + "\"";
 	}
 }
