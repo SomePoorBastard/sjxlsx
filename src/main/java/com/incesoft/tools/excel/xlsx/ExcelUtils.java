@@ -141,8 +141,10 @@ public class ExcelUtils {
 				List<String> cells = new ArrayList<>();
 				boolean isEmpty = true;
 				for (Cell cell : it.getCurRow()) {
-					if (null != cell && StringUtils.isNotBlank(cell.getValue())) {
-						isEmpty = false;
+					if (null != cell) {
+						if (StringUtils.isNotBlank(cell.getValue())) {
+                            isEmpty = false;
+                        }
 						cells.add(getQuotedCellValue(cell));
 					}
 				}
@@ -168,6 +170,6 @@ public class ExcelUtils {
 				return "\"" + sdf.format(cal.getTime()) + "\"";
 			}
 		}
-		return "\"" + cell.getValue().trim() + "\"";
+		return "\"" + (null != cell.getValue() ? cell.getValue().trim() : "") + "\"";
 	}
 }

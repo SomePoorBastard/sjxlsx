@@ -166,7 +166,10 @@ public class Sheet {
 								Cell cell = new Cell(r, s, t, v, text);
 								int numFmtId = sheet.workbook.getNumFmtId(s);
 								cell.setNumFmt(sheet.workbook.getNumFmt(numFmtId));
-								cell.setDate(DateUtil.isADateFormat(numFmtId, cell.getNumFmt()));
+								// only check for date format if it's not a string type
+								if (!"s".equals(t)) {
+									cell.setDate(DateUtil.isADateFormat(numFmtId, cell.getNumFmt()));
+								}
 								if (r.charAt(1) < 'A') {// number
 									ret[r.charAt(0) - 'A'] = cell;
 								} else if (r.length() > 2 && r.charAt(2) < 'A') {
